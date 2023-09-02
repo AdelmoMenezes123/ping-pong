@@ -18,9 +18,9 @@
 		<script>
 			const canvasEl = document.querySelector('canvas');
 			const canvasCtx = canvasEl.getContext('2d');
-			const lineWidth = 15;
 			const gapX = 10;
-
+			const mouse = {x:0, y:0}
+			
 			const field ={
 				w:window.innerWidth,
 				h:window.innerHeight,
@@ -44,9 +44,13 @@
 				y:100,
 				w:line.w,
 				h:200,
+				_move:	function(){
+					this.y = mouse.y - this.h / 2;
+				},
 				draw: function(){
 					canvasCtx.fillStyle = '#FFF';
 					canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+					this._move()
 				}
 			}
 			
@@ -55,9 +59,13 @@
 				y:100,
 				w:line.w,
 				h:200,
+				_move: function(){
+					this.y = ball.y - this.h / 2;
+				},
 				draw: function(){
 					canvasCtx.fillStyle = '#FFF';
 					canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+					this._move()
 				}
 			}
 
@@ -78,11 +86,18 @@
 				x: 300, 
 				y: 200,
 				r: 20,
+				speed: 5,
+				_move: function(){
+					this.x += 1 * this.speed
+					this.y += 1 * this.speed
+				},
 				draw: function(){
 					canvasCtx.fillStyle = '#FFF';
 					canvasCtx.beginPath();
 					canvasCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
 					canvasCtx.fill();
+
+					this._move()
 				}
 			}
 			
@@ -100,8 +115,31 @@
 				ball.draw();
 		}
 
-			setup();
-			draw()
+			window.animateFrame = (function(){
+				return (
+					window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame ||
+					window.oRequestAnimationFrame ||
+					window.msRequestAnimationFrame ||
+					function(callback){
+						return window.setTimeout(callback, 1000 / 60);
+					}
+				)
+			})();
+
+			function main(){
+				animateFrame(main);
+				draw();
+			}
+			
+			setup();	
+			main();
+
+			canvasEl.addEventListener('mousemove', function(e){
+				mouse.x = e.x;
+				mouse.y = e.y
+			})
 		</script>
 	</body>
 </html>
