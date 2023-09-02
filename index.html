@@ -70,8 +70,14 @@
 			}
 
 			const score = {
-				human:1,
-				cumputer:2,
+				human:0,
+				cumputer:0,
+				increaseHuman: function(){
+					this.human++
+				},
+				increaseCumputer: function(){
+					this.cumputer++
+				},
 				draw: function(){
 				canvasCtx.font = 'bold 72px Arial';
 				canvasCtx.textAlign = 'center';
@@ -83,20 +89,68 @@
 			}
 			
 			const ball ={
-				x: 300, 
-				y: 200,
+				x: 0, 
+				y: 0,
 				r: 20,
-				speed: 5,
+				speed: 6,
+				directionX: 1,
+				directionY: 1,
+				_calcPosition: function(){
+					// verifica se o jogador 1 fez 1 ponto (x > largura do campo - o raio)
+					if(this.x > field.w - this.r - rightPaddle.w  - gapX){
+						// verifica se a raquete da direita esta na posição y da bola
+						if(this.y + this.r > rightPaddle.y && this.y - this.r < rightPaddle.y + rightPaddle.h){
+							// rebate a bola invertendo o sinal X
+							this._reverseX()
+						}else {
+							// pontiuar o jogador 1
+							score.increaseHuman()
+							this._pointUp()
+						}
+					}
+
+					// verifica se o jogador 2 fez 1 ponto (x < 0)
+					if(this.x < this.r + leftPaddle.w + gapX){
+						if(this.y + this.r > leftPaddle.y && this.y - this.r < leftPaddle.y + leftPaddle.h){
+							// rebate a bola intervendo o sinal de x
+							this._reverseX()
+						}else {
+							//pontua o jogaodr 2
+							score.increaseCumputer()
+							this._pointUp()
+						}
+					}
+					// verifica as laterais superior e inferior do campo
+					if(
+					(this.y - this.r < 0  && this.directionY < 0) ||
+					(this.y > field.h - this.r && this.directionY > 0)
+					){
+						// rebate a bola invertendo o sinal do eixo Y
+						this._reverseY()
+					}
+				},
+				_reverseX: function(){
+					this.directionX *= -1
+				},
+				_reverseY: function(){
+					this.directionY *= -1
+				},
+				_pointUp: function(){
+					this.x = field.w / 2
+					this.y = field.h / 2
+				},
+		
 				_move: function(){
-					this.x += 1 * this.speed
-					this.y += 1 * this.speed
+					this.x += this.directionX * this.speed
+					this.y += this.directionY * this.speed
 				},
 				draw: function(){
 					canvasCtx.fillStyle = '#FFF';
 					canvasCtx.beginPath();
-					canvasCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
+					canvasCtx.arc(this.x, this.y, this.r, 0, 2 * Math.PI , false);
 					canvasCtx.fill();
 
+					this._calcPosition()
 					this._move()
 				}
 			}
